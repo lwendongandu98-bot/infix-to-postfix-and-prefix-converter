@@ -1,0 +1,38 @@
+FUNCTION Get_Priority(operator):
+    IF operator is ('*' or '/'): RETURN 2
+    IF operator is ('+' or '-'): RETURN 1
+    RETURN 0
+FUNCTION To_Postfix(expression):
+    CREATE empty stack 'S'
+    CREATE empty string 'Result'
+
+    FOR each character 'C' in expression:
+        IF 'C' is a Letter or Number:
+            APPEND 'C' to 'Result'
+        
+        ELSE IF 'C' is '(':
+            PUSH 'C' onto 'S'
+            
+        ELSE IF 'C' is ')':
+            WHILE 'S' is not empty AND top of 'S' is not '(':
+                APPEND S.pop() to 'Result'
+            S.pop() // Remove '(' from stack
+
+        ELSE IF 'C' is an Operator (+, -, *, /):
+            WHILE 'S' is not empty AND Get_Priority(S.top) >= Get_Priority('C'):
+                APPEND S.pop() to 'Result'
+            PUSH 'C' onto 'S'
+
+    WHILE 'S' is not empty:
+        APPEND S.pop() to 'Result'
+
+    RETURN 'Result'
+
+FUNCTION To_Prefix(expression):
+    STEP 1: Reverse the characters of 'expression'
+    STEP 2: For each character, swap '(' with ')' and vice-versa
+    STEP 3: 'Temp_Result' = To_Postfix(modified_expression)
+    STEP 4: 'Final_Prefix' = Reverse 'Temp_Result'
+    
+    RETURN 'Final_Prefix'
+
