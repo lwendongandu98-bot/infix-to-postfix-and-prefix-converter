@@ -3,88 +3,75 @@ import java.util.Scanner;
 
 public class ExpressionConverter {
 
-    // Helper to define operator strength
-    static int getPrecedence(char ch) {
-        switch (ch) {
-            case '+':
-            case '-':
-                return 1;
-            case '*':
-            case '/':
-                return 2;
-        }
-        return -1;
+    // 1. Define which operators are stronger
+    static int strength(char op) {
+        if (op == '+' || op == '-') return 1;
+        if (op == '*' || op == '/') return 2;
+        return 0;
     }
 
-    // Core logic for Infix to Postfix
-    public static String infixToPostfix(String exp) {
-        StringBuilder result = new StringBuilder();
+    // 2. The main logic 
+    public static String convertToPostfix(String input) {
         Stack<Character> stack = new Stack<>();
+        StringBuilder result = new StringBuilder();
 
-        for (int i = 0; i < exp.length(); i++) {
-            char c = exp.charAt(i);
-
-            // If operand, add to result
+        for (char c : input.toCharArray()) {
+            // If it's a letter or number
             if (Character.isLetterOrDigit(c)) {
                 result.append(c);
             } 
-            // If '(', push to stack
+            // If it's an opening bracket
             else if (c == '(') {
                 stack.push(c);
             } 
-            // If ')', pop until '(' is found
+            // If it's a closing bracket
             else if (c == ')') {
                 while (!stack.isEmpty() && stack.peek() != '(') {
                     result.append(stack.pop());
                 }
-                stack.pop(); // Discard '('
+                stack.pop(); // Remove the '('
             } 
-            // Operator encountered
+            // If it's an operator
             else {
-                while (!stack.isEmpty() && getPrecedence(c) <= getPrecedence(stack.peek())) {
+                while (!stack.isEmpty() && strength(stack.peek()) >= strength(c)) {
                     result.append(stack.pop());
                 }
                 stack.push(c);
             }
         }
 
-        // Pop remaining operators
+        // Empty the stack at the end
         while (!stack.isEmpty()) {
             result.append(stack.pop());
         }
-
         return result.toString();
     }
 
-    // Logic for Infix to Prefix
-    public static String infixToPrefix(String exp) {
-        // 1. Reverse the infix expression
-        StringBuilder revExp = new StringBuilder(exp).reverse();
-
-        // 2. Swap brackets
-        for (int i = 0; i < revExp.length(); i++) {
-            if (revExp.charAt(i) == '(') {
-                revExp.setCharAt(i, ')');
-            } else if (revExp.charAt(i) == ')') {
-                revExp.setCharAt(i, '(');
-            }
+    // 3. The Prefix logic using the shortcut
+    public static String convertToPrefix(String input) {
+        // Step 1: Reverse and swap brackets
+        StringBuilder reversed = new StringBuilder(input).reverse();
+        for (int i = 0; i < reversed.length(); i++) {
+            if (reversed.charAt(i) == '(') reversed.setCharAt(i, ')');
+            else if (reversed.charAt(i) == ')') reversed.setCharAt(i, '(');
         }
 
-        // 3. Get Postfix of the modified expression
-        String result = infixToPostfix(revExp.toString());
+        // Step 2: Get postfix of the reversed version
+        String postfix = convertToPostfix(reversed.toString());
 
-        // 4. Reverse result to get Prefix
-        return new StringBuilder(result).reverse().toString();
+        // Step 3: Reverse back to get Prefix
+        return new StringBuilder(postfix).reverse().toString();
     }
 
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter Infix Expression: ");
-        String infix = sc.nextLine();
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter your expression: ");
+        String expression = scanner.nextLine();
 
-        System.out.println("Postfix: " + infixToPostfix(infix));
-        System.out.println("Prefix:  " + infixToPrefix(infix));
+        System.out.println("--- Results ---");
+        System.out.println("Postfix: " + convertToPostfix(expression));
+        System.out.println("Prefix:  " + convertToPrefix(expression));
         
-        sc.close();
+        scanner.close();
     }
 }
